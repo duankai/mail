@@ -31,17 +31,17 @@ bool GosMail::Init()
 {
 	WORD wVersionRequested;
 	WSADATA wsaData;
-	
+
 	wVersionRequested = MAKEWORD(2,0);
 	INT nErr = WSAStartup(wVersionRequested, &wsaData);
-	if(nErr != 0) 
+	if(nErr != 0)
 	{
 		return false;
 	}
 
-	//版本判断
+	//version
 	if(LOBYTE(wsaData.wVersion) != 2 ||
-	   HIBYTE(wsaData.wVersion) != 0) 
+	   HIBYTE(wsaData.wVersion) != 0)
 	{
 		WSACleanup( );
 		return false;
@@ -90,13 +90,13 @@ int GosMail::InitMailBox()
 	{
 		return ERR_CONNECT_REQ;
 	}
-	
+
 	recvfrom(m_socket, recvBuff, sizeof(recvBuff),0,(SOCKADDR*)&m_sockAddr,&m_iSockAddrLen);
 	if (recvBuff[0] != '2' || recvBuff[1] != '2' || recvBuff[2] != '0')
 	{
 		return ERR_CONNECT_RSP;
 	}
-	
+
 	memset(sendBuff, 0, sizeof(sendBuff));
 
 	sprintf(sendBuff, "HELO %s\r\n", MAIN_SERVER);
@@ -139,7 +139,7 @@ int GosMail::Login(USER_INFO_T * pstUserInfo)
 	sendto(m_socket,sendBuff,strlen(sendBuff),0,(SOCKADDR*)&m_sockAddr,sizeof(SOCKADDR));
 
 	recvfrom(m_socket, recvBuff, sizeof(recvBuff),0,(SOCKADDR*)&m_sockAddr,&m_iSockAddrLen);
-	
+
 	if (recvBuff[0]!='3' || recvBuff[1]!='3' ||recvBuff[2]!='4')
 	{
 		return ERR_USERNAME;
@@ -160,7 +160,6 @@ int GosMail::Login(USER_INFO_T * pstUserInfo)
 
 	return SUCCESS_LOGIN;
 }
-
 
 int GosMail::SendContent(MAIL_INFO_T * pstMailInfo)
 {
@@ -187,7 +186,6 @@ int GosMail::SendContent(MAIL_INFO_T * pstMailInfo)
 		return ERR_MAIL_RECEVER;
 	}
 
-
 	sendto(m_socket,"DATA\r\n",strlen("DATA\r\n"),0,(SOCKADDR*)&m_sockAddr,sizeof(SOCKADDR));
 	recvfrom(m_socket, recvBuff, sizeof(recvBuff),0,(SOCKADDR*)&m_sockAddr,&m_iSockAddrLen);
 
@@ -195,11 +193,8 @@ int GosMail::SendContent(MAIL_INFO_T * pstMailInfo)
 	{
 		return ERR_DATA_REQ;
 	}
-
 	memset(sendBuff, 0, sizeof(sendBuff));
-
 	sprintf(sendBuff, "from: \"%s\"\r\n" "to: \"%s\"\r\n" "subject: \"%s\"\r\n\r\n %s\r\n.\r\n", pstMailInfo->from, pstMailInfo->to, pstMailInfo->subject, pstMailInfo->content);
-
 
 	sendto(m_socket,sendBuff,strlen(sendBuff),0,(SOCKADDR*)&m_sockAddr,sizeof(SOCKADDR));
 	recvfrom(m_socket, recvBuff, sizeof(recvBuff),0,(SOCKADDR*)&m_sockAddr,&m_iSockAddrLen);
@@ -208,21 +203,18 @@ int GosMail::SendContent(MAIL_INFO_T * pstMailInfo)
 	{
 		return ERR_SEND_MAIL;
 	}
-
 	return SUCCESS_SEND_MAIL;
 }
 
-
 int GosMail::QuitEmailBox()
 {
-		
 	sendto(m_socket,"QUIT\r\n",strlen("QUIT\r\n"),0,(SOCKADDR*)&m_sockAddr,sizeof(SOCKADDR));
 	recvfrom(m_socket, recvBuff, sizeof(recvBuff),0,(SOCKADDR*)&m_sockAddr,&m_iSockAddrLen);
 	if (recvBuff[0]!='2' || recvBuff[1]!='2' ||recvBuff[2]!='1')
 	{
 		FreeResource();
 		return ERR_QUIT;
-	} 
+	}
 	return SUCCESS_QUIT;
 }
 
@@ -239,12 +231,10 @@ int GosMail::SendMail(USER_INFO_T * pstUserInfo, MAIL_INFO_T * pstMailInfo)
 		return ERR_LOGIN;
 	}
 
-
 	if (SendContent(pstMailInfo) != SUCCESS_SEND_MAIL)
 	{
 		return ERR_SEND_CONTENT;
 	}
 
 	return QuitEmailBox();
-
 }

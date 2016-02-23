@@ -5,10 +5,9 @@
 
 #ifdef __LINUX__
 
-
 #else
 #include <WinSock2.h>
-#pragma comment(lib,"ws2_32") 
+#pragma comment(lib,"ws2_32")
 #endif
 
 
@@ -53,8 +52,6 @@ typedef struct MAIL_INFO_T
 	char subject[128];
 	char content[2048 + 256];
 }MAIL_INFO_T;
-
-
 
 class GosMail
 {

@@ -1,4 +1,4 @@
 mail
 ====
 
-This is a c++ project
+This is a c++ project.
